@@ -47,10 +47,10 @@ def get_input(title: str, msg: str, callback: callable, defv: str = ''):
     def lambda_input_event(event):
         lambda_callback()
 
-    cancel = tk.Button(top, text='Cancel', command=lambda_close_input)
+    cancel = tk.Button(top, text='Cancel', command=lambda_close_input, font='monospace')
     cancel.grid(column=0, row=2, padx=5, pady=5)
 
-    ok = tk.Button(top, text='OK', command=lambda_callback)
+    ok = tk.Button(top, text='OK', command=lambda_callback, font='monospace')
     ok.grid(column=1, row=2, padx=5, pady=5)
 
     # entry.bind('<Return>', lambda_input_event)
@@ -74,10 +74,10 @@ def get_confirm(title: str, msg: str, callback: callable):
     def lambda_input_event(event):
         lambda_callback()
 
-    cancel = tk.Button(top, text='Cancel', command=lambda_close_input)
+    cancel = tk.Button(top, text='Cancel', command=lambda_close_input, font='monospace')
     cancel.grid(column=0, row=1, padx=5, pady=5)
 
-    ok = tk.Button(top, text='OK', command=lambda_callback)
+    ok = tk.Button(top, text='OK', command=lambda_callback, font='monospace')
     ok.grid(column=1, row=1, padx=5, pady=5)
     
     cancel.focus_force()
@@ -254,7 +254,7 @@ def refresh_view(dl0: tk.Listbox, dl1: tk.Listbox, tl: tk.Listbox, pl: tk.Listbo
     for e in data['todo']:
         dl0.insert('end', str(k))
         tl.insert('end', e)
-        tlb.insert('end', ' + ')
+        tlb.insert('end', ' = ')
         k += 1
         
     dl0.insert('end', '   ')
