@@ -19,7 +19,7 @@ face_str = '''
 '''
 
 '''
-@ FUNCTIONS
+@ FUNCTIONS:
 '''
 
 class Config:
