@@ -2,9 +2,7 @@
 import json
 import tkinter as tk
 import re
-import numpy as np
 import os
-import time
 
 '''
 @ CONFIG:
@@ -18,6 +16,17 @@ face_str = '''
  (__) \__/(____/ \__/   \____/(__)(____/ (__) 
 '''
 
+
+'''
+@ CORE VARIABLES:
+'''
+
+filter0 = ''
+filter1 = ''
+todo_id_mapping = []
+pass_id_mapping = []
+
+
 '''
 @ FUNCTIONS:
 '''
@@ -28,7 +37,8 @@ class Config:
 
 
 def get_input(title: str, msg: str, callback: callable, defv: str = ''):
-    top = tk.Tk(title)
+    top = tk.Tk()
+    top.title(title)
     label = tk.Label(top, text=msg, width=64, font='monospace')
     label.grid(column=0, row=0, columnspan=2)
 
@@ -60,7 +70,8 @@ def get_input(title: str, msg: str, callback: callable, defv: str = ''):
 
 
 def get_confirm(title: str, msg: str, callback: callable):
-    top = tk.Tk(title)
+    top = tk.Tk()
+    top.title(title)
     label = tk.Label(top, text=msg, width=64, font='monospace')
     label.grid(column=0, row=0, columnspan=2)
 
@@ -111,7 +122,7 @@ def load() -> Config:
 
 def click_list_todo(event, lb: tk.Listbox, data, more):
 
-    sel = lb.curselection()[0]
+    sel = todo_id_mapping[lb.curselection()[0]]
 
     data['pass'].append(data['todo'][sel])
     del data['todo'][sel]
@@ -120,7 +131,7 @@ def click_list_todo(event, lb: tk.Listbox, data, more):
 
 def click_list_pass(event, lb: tk.Listbox, data, more):
 
-    sel = lb.size() - lb.curselection()[0] - 1
+    sel = len(data['pass']) - pass_id_mapping[lb.curselection()[0]] - 1
 
     data['todo'].append(data['pass'][sel])
     del data['pass'][sel]
@@ -135,16 +146,17 @@ def click_to_add(event, lb: tk.Listbox, data, more):
         def lambda_add_new_item(res: str):
             data['todo'].append(res)
             refresh_view(*more)
-        get_input('create', 'Create a new todo item:', lambda_add_new_item, 'a ')
+        get_input('create', 'Create a new todo item:', lambda_add_new_item, 'a: ')
     else:
         def lambda_set_item(res: str):
-            data['todo'][sel] = res
+            data['todo'][todo_id_mapping[sel]] = res
             refresh_view(*more)
-        get_input('modify', 'Modify the exist todo item:', lambda_set_item, data['todo'][sel])
+        get_input('modify', 'Modify the exist todo item:', lambda_set_item, data['todo'][todo_id_mapping[sel]])
 
 
 def make_view(config: Config):
     top = tk.Tk()
+    top.title('Todo List')
 
     todo_data: dict = None
 
@@ -208,7 +220,23 @@ def make_view(config: Config):
     scl1v.grid(column=2, row=3, ipady=64)
     scl1h.grid(column=1, row=4, ipadx=256)
 
-    refresh_view(dl0, dl1, tl, pl, tlb, plb, todo_data)
+    def lambda_set_filter0(s: str):
+        global filter0
+        filter0 = s
+        refresh_view(dl0, dl1, tl, pl, tlb, plb, todo_data, config)
+
+    def lambda_set_filter1(s: str):
+        global filter1
+        filter1 = s
+        refresh_view(dl0, dl1, tl, pl, tlb, plb, todo_data, config)
+
+    search0 = tk.Button(top, text='filter', font='monospace', command=lambda: get_input('set filter for todo items', 'Input the filter regex for todo items:', lambda_set_filter0, filter0))
+    search0.grid(column=2, row=2, columnspan=2, padx=2, pady=2)
+    
+    search1 = tk.Button(top, text='filter', font='monospace', command=lambda: get_input('set filter for pass items', 'Input the filter regex for pass items:', lambda_set_filter1, filter1))
+    search1.grid(column=2, row=4, columnspan=2, padx=2, pady=2)
+
+    refresh_view(dl0, dl1, tl, pl, tlb, plb, todo_data, config)
 
     def lambda_at_todo(event):
         if len(tlb.curselection()) == 0:
@@ -216,22 +244,22 @@ def make_view(config: Config):
         if tlb.curselection()[0] == tlb.size() - 1:
             return
 
-        s = todo_data['todo'][tlb.curselection()[0]]
+        s = todo_data['todo'][todo_id_mapping[tlb.curselection()[0]]]
 
-        get_confirm('confirm', 'send it to pass? \n' + s, lambda: click_list_todo(event, tlb, todo_data, (dl0, dl1, tl, pl, tlb, plb, todo_data)))
+        get_confirm('confirm', 'send it to pass? \n' + s, lambda: click_list_todo(event, tlb, todo_data, (dl0, dl1, tl, pl, tlb, plb, todo_data, config)))
 
     def lambda_at_pass(event):
         if len(plb.curselection()) == 0:
             return
 
-        s = todo_data['pass'][plb.curselection()[0]]
+        s = todo_data['pass'][len(todo_data['pass']) - pass_id_mapping[plb.curselection()[0]] - 1]
 
-        get_confirm('confirm', 'send it to todo? \n' + s, lambda: click_list_pass(event, plb, todo_data, (dl0, dl1, tl, pl, tlb, plb, todo_data)))
+        get_confirm('confirm', 'send it to todo? \n' + s, lambda: click_list_pass(event, plb, todo_data, (dl0, dl1, tl, pl, tlb, plb, todo_data, config)))
 
     def lambda_at_todo_list(event):
         if len(tl.curselection()) == 0:
             return
-        click_to_add(event, tl, todo_data, (dl0, dl1, tl, pl, tlb, plb, todo_data))
+        click_to_add(event, tl, todo_data, (dl0, dl1, tl, pl, tlb, plb, todo_data, config))
 
     tlb.bind('<<ListboxSelect>>', lambda_at_todo)
     plb.bind('<<ListboxSelect>>', lambda_at_pass)
@@ -239,7 +267,8 @@ def make_view(config: Config):
 
     top.mainloop()
 
-def refresh_view(dl0: tk.Listbox, dl1: tk.Listbox, tl: tk.Listbox, pl: tk.Listbox, tlb: tk.Listbox, plb: tk.Listbox, data: dict):
+
+def refresh_view(dl0: tk.Listbox, dl1: tk.Listbox, tl: tk.Listbox, pl: tk.Listbox, tlb: tk.Listbox, plb: tk.Listbox, data: dict, config: Config):
     dl0.delete(0, dl0.size())
     dl1.delete(0, dl1.size())
     tl.delete(0, tl.size())
@@ -247,14 +276,23 @@ def refresh_view(dl0: tk.Listbox, dl1: tk.Listbox, tl: tk.Listbox, pl: tk.Listbo
     tlb.delete(0, tlb.size())
     plb.delete(0, plb.size())
 
+    global todo_id_mapping
+    global pass_id_mapping
+
     data['todo'].sort(key=lambda e: 'z' if (e[0] >= 'a' and e[0] <= 'z') or (e[0] >= 'A' and e[0] <= 'Z') else e[0])
     data['pass'].sort(key=lambda e: 'z' if (e[0] >= 'a' and e[0] <= 'z') or (e[0] >= 'A' and e[0] <= 'Z') else e[0])
 
+    real_filter0 = re.compile(''.join(filter0.split(' ')))
+    real_filter1 = re.compile(''.join(filter1.split(' ')))
+
     k = 0
+    todo_id_mapping.clear()
     for e in data['todo']:
-        dl0.insert('end', str(k))
-        tl.insert('end', e)
-        tlb.insert('end', ' = ')
+        if real_filter0.match(e):
+            dl0.insert('end', str(k))
+            tl.insert('end', e)
+            tlb.insert('end', ' = ')
+            todo_id_mapping.append(k)
         k += 1
         
     dl0.insert('end', '   ')
@@ -262,19 +300,25 @@ def refresh_view(dl0: tk.Listbox, dl1: tk.Listbox, tl: tk.Listbox, pl: tk.Listbo
     tlb.insert('end', '   ')
     
     k = 0
+    pass_id_mapping.clear()
     for e in reversed(data['pass']):
-        dl1.insert('end', str(k))
-        pl.insert('end', e)
-        plb.insert('end', ' - ')
+        if real_filter1.match(e):
+            dl1.insert('end', str(k))
+            pl.insert('end', e)
+            plb.insert('end', ' - ')
+            pass_id_mapping.append(k)
         k += 1
 
     with open(config.todo_file, 'w') as fw:
         json.dump(data, fw)
-
-if __name__ == '__main__':
+        
+def start():
     config = load()
 
     make_view(config)
+
+if __name__ == '__main__':
+    start()
 
 
 
