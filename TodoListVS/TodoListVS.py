@@ -25,6 +25,7 @@ filter0 = ''
 filter1 = ''
 todo_id_mapping = []
 pass_id_mapping = []
+font = 'TkFixedFont'
 
 
 '''
@@ -36,10 +37,16 @@ class Config:
         self.todo_file: str = ''
 
 
+class ConfigEncoder(json.JSONEncoder):
+    def default(self, o: Config) -> dict:
+        return {'todo_file': o.todo_file}
+
+
+
 def get_input(title: str, msg: str, callback: callable, defv: str = ''):
     top = tk.Tk()
     top.title(title)
-    label = tk.Label(top, text=msg, width=64, font='monospace')
+    label = tk.Label(top, text=msg, width=64, font=font)
     label.grid(column=0, row=0, columnspan=2)
 
     val = tk.StringVar(top, value=defv)
@@ -57,10 +64,10 @@ def get_input(title: str, msg: str, callback: callable, defv: str = ''):
     def lambda_input_event(event):
         lambda_callback()
 
-    cancel = tk.Button(top, text='Cancel', command=lambda_close_input, font='monospace')
+    cancel = tk.Button(top, text='Cancel', command=lambda_close_input, font=font)
     cancel.grid(column=0, row=2, padx=5, pady=5)
 
-    ok = tk.Button(top, text='OK', command=lambda_callback, font='monospace')
+    ok = tk.Button(top, text='OK', command=lambda_callback, font=font)
     ok.grid(column=1, row=2, padx=5, pady=5)
 
     # entry.bind('<Return>', lambda_input_event)
@@ -72,7 +79,7 @@ def get_input(title: str, msg: str, callback: callable, defv: str = ''):
 def get_confirm(title: str, msg: str, callback: callable):
     top = tk.Tk()
     top.title(title)
-    label = tk.Label(top, text=msg, width=64, font='monospace')
+    label = tk.Label(top, text=msg, width=64, font=font)
     label.grid(column=0, row=0, columnspan=2)
 
     def lambda_close_input():
@@ -85,10 +92,10 @@ def get_confirm(title: str, msg: str, callback: callable):
     def lambda_input_event(event):
         lambda_callback()
 
-    cancel = tk.Button(top, text='Cancel', command=lambda_close_input, font='monospace')
+    cancel = tk.Button(top, text='Cancel', command=lambda_close_input, font=font)
     cancel.grid(column=0, row=1, padx=5, pady=5)
 
-    ok = tk.Button(top, text='OK', command=lambda_callback, font='monospace')
+    ok = tk.Button(top, text='OK', command=lambda_callback, font=font)
     ok.grid(column=1, row=1, padx=5, pady=5)
     
     cancel.focus_force()
@@ -101,10 +108,8 @@ def dict2config(d: dict):
 
 
 def save(config: Config):
-    text = json.dump(config)
-
     with open(memory_file, 'w') as fw:
-        fw.write(text)
+        json.dump(config, fw, cls=ConfigEncoder)
 
 
 def load() -> Config:
@@ -171,7 +176,7 @@ def make_view(config: Config):
         todo_data['todo'] = ['add a todo item']
         todo_data['pass'] = ['launch this simple todo list']
 
-    face = tk.Label(top, text=face_str, font='monospace')
+    face = tk.Label(top, text=face_str, font=font)
     face.grid(column=0, row=0, columnspan=4, padx=2, pady=2)
 
     def lambda_make_view_align0(a, b):
@@ -192,22 +197,22 @@ def make_view(config: Config):
     def lambda_make_view_align1_x(a, b):
         scl1h.set(a, b)
 
-    dl0 = tk.Listbox(top, width=5, font='monospace', yscrollcommand=lambda_make_view_align0)
+    dl0 = tk.Listbox(top, width=5, font=font, yscrollcommand=lambda_make_view_align0)
     dl0.grid(column=0, row=1, padx=2, pady=2)
 
-    dl1 = tk.Listbox(top, width=5, font='monospace', yscrollcommand=lambda_make_view_align1)
+    dl1 = tk.Listbox(top, width=5, font=font, yscrollcommand=lambda_make_view_align1)
     dl1.grid(column=0, row=3, padx=2, pady=2)
 
-    tl = tk.Listbox(top, font='monospace', width=64, yscrollcommand=lambda_make_view_align0, xscrollcommand=lambda_make_view_align0_x)
+    tl = tk.Listbox(top, font=font, width=64, yscrollcommand=lambda_make_view_align0, xscrollcommand=lambda_make_view_align0_x)
     tl.grid(column=1, row=1, sticky='nswe', padx=2, pady=2)
 
-    pl = tk.Listbox(top, font='monospace', width=64, yscrollcommand=lambda_make_view_align1, xscrollcommand=lambda_make_view_align1_x)
+    pl = tk.Listbox(top, font=font, width=64, yscrollcommand=lambda_make_view_align1, xscrollcommand=lambda_make_view_align1_x)
     pl.grid(column=1, row=3, sticky='nswe', padx=2, pady=2)
 
-    tlb = tk.Listbox(top, width=3, font='monospace', yscrollcommand=lambda_make_view_align0)
+    tlb = tk.Listbox(top, width=3, font=font, yscrollcommand=lambda_make_view_align0)
     tlb.grid(column=3, row=1, padx=2, pady=2)
 
-    plb = tk.Listbox(top, width=3, font='monospace', yscrollcommand=lambda_make_view_align1)
+    plb = tk.Listbox(top, width=3, font=font, yscrollcommand=lambda_make_view_align1)
     plb.grid(column=3, row=3, padx=2, pady=2)
 
     scl0v = tk.Scrollbar(top, orient=tk.VERTICAL, command=tl.yview)
@@ -230,10 +235,10 @@ def make_view(config: Config):
         filter1 = s
         refresh_view(dl0, dl1, tl, pl, tlb, plb, todo_data, config)
 
-    search0 = tk.Button(top, text='filter', font='monospace', command=lambda: get_input('set filter for todo items', 'Input the filter regex for todo items:', lambda_set_filter0, filter0))
+    search0 = tk.Button(top, text='filter', font=font, command=lambda: get_input('set filter for todo items', 'Input the filter regex for todo items:', lambda_set_filter0, filter0))
     search0.grid(column=2, row=2, columnspan=2, padx=2, pady=2)
     
-    search1 = tk.Button(top, text='filter', font='monospace', command=lambda: get_input('set filter for pass items', 'Input the filter regex for pass items:', lambda_set_filter1, filter1))
+    search1 = tk.Button(top, text='filter', font=font, command=lambda: get_input('set filter for pass items', 'Input the filter regex for pass items:', lambda_set_filter1, filter1))
     search1.grid(column=2, row=4, columnspan=2, padx=2, pady=2)
 
     refresh_view(dl0, dl1, tl, pl, tlb, plb, todo_data, config)
