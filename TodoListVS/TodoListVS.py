@@ -198,32 +198,32 @@ def make_view(config: Config):
         scl1h.set(a, b)
 
     dl0 = tk.Listbox(top, width=5, font=font, yscrollcommand=lambda_make_view_align0)
-    dl0.grid(column=0, row=1, padx=2, pady=2)
+    dl0.grid(column=0, row=1, padx=2, pady=2, sticky=tk.N + tk.S)
 
     dl1 = tk.Listbox(top, width=5, font=font, yscrollcommand=lambda_make_view_align1)
-    dl1.grid(column=0, row=3, padx=2, pady=2)
+    dl1.grid(column=0, row=3, padx=2, pady=2, sticky=tk.N + tk.S)
 
     tl = tk.Listbox(top, font=font, width=64, yscrollcommand=lambda_make_view_align0, xscrollcommand=lambda_make_view_align0_x)
-    tl.grid(column=1, row=1, sticky='nswe', padx=2, pady=2)
+    tl.grid(column=1, row=1, sticky=tk.N + tk.W + tk.S + tk.E, padx=2, pady=2, ipady=64)
 
     pl = tk.Listbox(top, font=font, width=64, yscrollcommand=lambda_make_view_align1, xscrollcommand=lambda_make_view_align1_x)
-    pl.grid(column=1, row=3, sticky='nswe', padx=2, pady=2)
+    pl.grid(column=1, row=3, sticky=tk.N + tk.W + tk.S + tk.E, padx=2, pady=2, ipady=64)
 
     tlb = tk.Listbox(top, width=3, font=font, yscrollcommand=lambda_make_view_align0)
-    tlb.grid(column=3, row=1, padx=2, pady=2)
+    tlb.grid(column=3, row=1, padx=2, pady=2, sticky=tk.N + tk.S)
 
     plb = tk.Listbox(top, width=3, font=font, yscrollcommand=lambda_make_view_align1)
-    plb.grid(column=3, row=3, padx=2, pady=2)
+    plb.grid(column=3, row=3, padx=2, pady=2, sticky=tk.N + tk.S)
 
     scl0v = tk.Scrollbar(top, orient=tk.VERTICAL, command=tl.yview)
     scl0h = tk.Scrollbar(top, orient=tk.HORIZONTAL, command=tl.xview)
-    scl0v.grid(column=2, row=1, ipady=64)
-    scl0h.grid(column=1, row=2, ipadx=256)
+    scl0v.grid(column=2, row=1, sticky=tk.N + tk.S)
+    scl0h.grid(column=1, row=2, sticky=tk.W + tk.E)
     
     scl1v = tk.Scrollbar(top, orient=tk.VERTICAL, command=pl.yview)
     scl1h = tk.Scrollbar(top, orient=tk.HORIZONTAL, command=pl.xview)
-    scl1v.grid(column=2, row=3, ipady=64)
-    scl1h.grid(column=1, row=4, ipadx=256)
+    scl1v.grid(column=2, row=3, sticky=tk.N + tk.S)
+    scl1h.grid(column=1, row=4, sticky=tk.W + tk.E)
 
     def lambda_set_filter0(s: str):
         global filter0
