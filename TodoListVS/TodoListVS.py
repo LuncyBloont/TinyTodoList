@@ -162,6 +162,7 @@ def click_to_add(event, lb: tk.Listbox, data, more):
 def make_view(config: Config):
     top = tk.Tk()
     top.title('Todo List')
+    top.resizable(False, False)
 
     todo_data: dict = None
 
@@ -270,7 +271,7 @@ def make_view(config: Config):
     plb.bind('<<ListboxSelect>>', lambda_at_pass)
     tl.bind('<<ListboxSelect>>', lambda_at_todo_list)
 
-    top.mainloop()
+    return top
 
 
 def refresh_view(dl0: tk.Listbox, dl1: tk.Listbox, tl: tk.Listbox, pl: tk.Listbox, tlb: tk.Listbox, plb: tk.Listbox, data: dict, config: Config):
@@ -319,8 +320,8 @@ def refresh_view(dl0: tk.Listbox, dl1: tk.Listbox, tl: tk.Listbox, pl: tk.Listbo
         
 def start():
     config = load()
-
-    make_view(config)
+    top = make_view(config)
+    top.mainloop()
 
 if __name__ == '__main__':
     start()
